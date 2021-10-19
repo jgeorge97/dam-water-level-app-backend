@@ -4,3 +4,8 @@ Since the data is uploaded as a pdf without a uniform naming convention of the f
 
 ## Enviroment Variables
 `DAM_WATER_LEVEL_FILE_LOCATION=<URL of the data pdf file obtained from KSDMA site (https only)>`
+
+## API Routes
+Route | Description
+------|------------
+/dam/getData| Returns a JSON containing the status of the dams
