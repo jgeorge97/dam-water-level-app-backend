@@ -3,9 +3,12 @@ Backend to fetch water level data from [KSDMA Site](https://sdma.kerala.gov.in/d
 Since the data is uploaded as a pdf without a uniform naming convention of the file, currently the the URL of the pdf file is passed directly to the enviroment file. If anyone has better idea please raise an issue & we can discuss it.
 
 ## Enviroment Variables
-`DAM_WATER_LEVEL_FILE_LOCATION=<URL of the data pdf file obtained from KSDMA site (https only)>`
-
+Variable | Description
+---------|------------
+DAM_WATER_LEVEL_FILE_LOCATION | URL of the KSEB dam data pdf file obtained from KSDMA site (https only)
+IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION | URL of the irrigation dams data pdf file obtained from KSDMA site (https only)
 ## API Routes
 Route | Description
 ------|------------
-/dam/getData| Returns a JSON containing the status of the dams
+/dam/getData| Returns a JSON containing the status of the KSEB dams
+/dam/getIrrigationData| Returns a JSON containing the status of the Irrigation dams
