@@ -3,8 +3,9 @@ const router = express.Router();
 var pdf_table_extractor = require("pdf-table-extractor");
 const https = require("https");
 const fs = require('fs')
+const cors = require('cors')
 
-const url = process.env.DAM_WATER_LEVEL_FILE_LOCATION
+router.use(cors())
 
 router.get('/getData', (req, res, next) => {
 
