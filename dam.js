@@ -60,6 +60,12 @@ router.get('/getIrrigationData', (req, res, next) => {
   const success = (result) => {
     const damData = []
     for (let index = 4; index <= 23; index++) {
+      let storagePercentage = null
+      if(result.pageTables[0].tables[index][10] === '' || result.pageTables[0].tables[index][10] === '_') {
+        storagePercentage = ((result.pageTables[0].tables[index][9]/result.pageTables[0].tables[index][8]) * 100).toFixed(2)
+      } else {
+        storagePercentage = result.pageTables[0].tables[index][10]
+      }
       damData.push({
         slNo: result.pageTables[0].tables[index][0],
         name: result.pageTables[0].tables[index][1],
@@ -70,7 +76,7 @@ router.get('/getIrrigationData', (req, res, next) => {
         blueAlertLevel: result.pageTables[0].tables[index][5],
         orangeAlertLevel: result.pageTables[0].tables[index][6],
         redAlertLevel: result.pageTables[0].tables[index][7],
-        percentStorage: result.pageTables[0].tables[index][10],
+        percentStorage: storagePercentage,
         spillAmount: result.pageTables[0].tables[index][11]
       })
     }
