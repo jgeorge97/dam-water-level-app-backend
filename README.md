@@ -18,4 +18,4 @@ Route | Description
 - [ ] A efficient way to extract entire date & time from the PDF
 - [ ] Convert the number strings to numbers
 - [ ] Logic to calculate alert level of the dam
-- [ ] Find a better way to get the data preferrably a spreadsheet🥲
+- [ ] Find a better way to get the data preferrably a spreadsheet
