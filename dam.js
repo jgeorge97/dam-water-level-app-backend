@@ -14,7 +14,16 @@ router.get('/getData', (req, res, next) => {
     for (let index = 4; index <= 20; index++) {
       damData.push({
         slNo: result.pageTables[0].tables[index][0],
-        name: result.pageTables[0].tables[index][1],
+        name: {
+          en: result.pageTables[0].tables[index][1].split(" ")[1],
+          ml: result.pageTables[0].tables[index][1].split(" ")[0],
+          raw: result.pageTables[0].tables[index][1]
+        },
+        district: {
+          en: result.pageTables[0].tables[index][2].split("\n")[1].replace(/ /g, ''),
+          ml: result.pageTables[0].tables[index][2].split("\n")[0].replace(/ /g, ''),
+          raw: result.pageTables[0].tables[index][2]
+        },
         currentWaterLevel: result.pageTables[0].tables[index][4],
         currentDayMaxWaterLevel: result.pageTables[0].tables[index][5],
         maxWaterLevel: result.pageTables[0].tables[index][3],
@@ -84,7 +93,8 @@ router.get('/getIrrigationData', (req, res, next) => {
     var last_updated = "";
     const last_updated_string_array = result.pageTables[0].tables[0][0].split("")
     for (let index = 68; index <= 88; index++) {
-      last_updated = last_updated + last_updated_string_array[index]
+      if(last_updated_string_array[index] !== undefined)
+        last_updated = last_updated + last_updated_string_array[index]
     }
     
     res.status(200).json({
