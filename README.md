@@ -12,3 +12,10 @@ Route | Description
 ------|------------
 /dam/getData| Returns a JSON containing the status of the KSEB dams
 /dam/getIrrigationData| Returns a JSON containing the status of the Irrigation dams
+
+## To-do
+- [ ] A HTML crawler to fetch the URL's of the PDF files automatically
+- [ ] A efficient way to extract entire date & time from the PDF
+- [ ] Convert the number strings to numbers
+- [ ] Logic to calculate alert level of the dam
+- [ ] Find a better way to get the data preferrably a spreadsheet🥲
