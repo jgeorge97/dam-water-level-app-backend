@@ -37,7 +37,7 @@ router.get('/getData', (req, res, next) => {
   
       var last_updated = "";
       const last_updated_string_array = result.pageTables[0].tables[0][0].split("")
-      for (let index = 87; index <= 103; index++) {
+      for (let index = 87; index <= 106; index++) {
         last_updated = last_updated + last_updated_string_array[index]
       }  
 
