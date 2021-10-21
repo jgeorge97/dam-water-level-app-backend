@@ -1,4 +1,6 @@
 # DAM WATER LEVEL APP BACKEND
+[![Gitter](https://badges.gitter.im/dam-water-level-app/community.svg)](https://gitter.im/dam-water-level-app/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 Backend to fetch water level data from [KSDMA Site](https://sdma.kerala.gov.in/dam-water-level/) of Dams in Kerala.
 Since the data is uploaded as a pdf without a uniform naming convention of the file, currently the the URL of the pdf file is passed directly to the enviroment file. If anyone has better idea please raise an issue & we can discuss it.
 
