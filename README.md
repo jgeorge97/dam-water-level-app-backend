@@ -19,3 +19,4 @@ Route | Description
 - [ ] Convert the number strings to numbers
 - [ ] Logic to calculate alert level of the dam
 - [ ] Find a better way to get the data preferrably a spreadsheet
+- [ ] Fix Malayalam typo
