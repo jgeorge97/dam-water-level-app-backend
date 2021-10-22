@@ -5,71 +5,116 @@ const https = require("https");
 const fs = require('fs')
 const cors = require('cors')
 
+// Function to download file
+const download = (url, dest) => new Promise((resolve, reject) => {
+  https.get(url, response => {
+    const statusCode = response.statusCode;
+
+    if (statusCode !== 200) {
+      return reject('Download error!');
+    }
+
+    const writeStream = fs.createWriteStream(dest);
+    response.pipe(writeStream);
+
+    writeStream.on('error', () => reject('Error writing to file!'));
+    writeStream.on('finish', () => writeStream.close(resolve));
+  });
+}).catch(err => console.error(err));
+
+// Remove unwanted characters from the text
+function clean_text(text) {
+  return text
+    .replace("\n", " ") // replace new lines with spaces
+    .replace(/\(/g, " (") // Add space before (
+    .replace(/\s+/g, ' ') // replace multiple spaces with single space
+    .trim(); // trim spaces
+}
+
+// Split string into malayalam and english parts
+function split_ml_en(text) {
+  const ml_regex = /\({0,1}[^\x00-\x7F]+\){0,1}/g;
+  var ml = [], en = [];
+  for (const word of text.split(" ")) {
+    if (ml_regex.test(word)) {
+      ml.push(word);
+    } else {
+      en.push(word);
+    }
+  }
+  return {
+    ml: ml.join(' '),
+    en: en.join(' '),
+    raw: text
+  }
+}
+
+// Extract last updated time from the pdf
+function extract_lastupdated(table) {
+  const table_title = table[0][0];
+  const last_updated_matches = table_title.match(/\d{1,2}\/\d{1,2}\/\d{2,4},\s?\d{2}(?:[\.|:]\d{2})?\s?[A|P]M/);
+  if (last_updated_matches.length == 1) {
+    return last_updated_matches[0];
+  }
+  return '';
+}
+
+// Calculate storage usage if not present
+function calculate_storage_percentage(dam) {
+  if (dam[10] === '' || dam[10] === '_') {
+    return ((dam[9] / dam[8]) * 100).toFixed(2);
+  }
+  return dam[10];
+}
+
+// Handle errors
+function on_error(res, err) {
+  res.status(200).json({
+    error: true,
+    message: err
+  });
+}
+
 router.use(cors())
 
 router.get('/getData', (req, res, next) => {
-  
+
   const success = (result) => {
     const damData = []
 
     try {
-      for (let index = 4; index <= 20; index++) {
-        damData.push({
-          slNo: result.pageTables[0].tables[index][0],
-          name: {
-            en: result.pageTables[0].tables[index][1].split(" ")[1],
-            ml: result.pageTables[0].tables[index][1].split(" ")[0],
-            raw: result.pageTables[0].tables[index][1]
-          },
-          district: {
-            en: result.pageTables[0].tables[index][2].split("\n")[1].replace(/ /g, ''),
-            ml: result.pageTables[0].tables[index][2].split("\n")[0].replace(/ /g, ''),
-            raw: result.pageTables[0].tables[index][2]
-          },
-          currentWaterLevel: result.pageTables[0].tables[index][4],
-          currentDayMaxWaterLevel: result.pageTables[0].tables[index][5],
-          maxWaterLevel: result.pageTables[0].tables[index][3],
-          remarks: result.pageTables[0].tables[index][13],
-          percentStorage: result.pageTables[0].tables[index][11],
-          spillAmount: result.pageTables[0].tables[index][12]
-        })
+      for (const page of result.pageTables) {
+        for (const dam of page.tables) {
+          // If first column is a number, then it is a dam
+          if (dam[0] != '' && !isNaN(dam[0])) {
+            damData.push({
+              slNo: clean_text(dam[0]),
+              name: split_ml_en(clean_text(dam[1])),
+              district: split_ml_en(clean_text(dam[2])),
+              maxWaterLevel: clean_text(dam[3]),
+              currentWaterLevel: clean_text(dam[4]),
+              currentDayMaxWaterLevel: clean_text(dam[5]),
+              percentStorage: clean_text(dam[11]),
+              spillAmount: clean_text(dam[12]),
+              remarks: clean_text(dam[13])
+            })
+          }
+        }
       }
-  
-      var last_updated = "";
-      const last_updated_string_array = result.pageTables[0].tables[0][0].split("")
-      for (let index = 87; index <= 106; index++) {
-        last_updated = last_updated + last_updated_string_array[index]
-      }  
 
       res.status(200).json({
         message: damData,
         error: false,
-        last_updated: last_updated
-      });  
+        last_updated: extract_lastupdated(result.pageTables[0].tables)
+      });
     } catch (error) {
-      res.status(200).json({
-        error: true,
-        message: error
-      })
+      on_error(res, error);
     }
   }
 
-  const error = (err) => {
-    res.status(200).json({
-      error: true,
-      message: err
-    })
-  }
-
-
-  download(process.env.DAM_WATER_LEVEL_FILE_LOCATION, "kseb_dam.pdf").then(
-    function(value) {
-      pdf_table_extractor("kseb_dam.pdf", success, error);
-    },
-    function(error) {
-      console.error(error);
-    }
-  )
+  download(process.env.DAM_WATER_LEVEL_FILE_LOCATION, "kseb_dam.pdf").then((value) => {
+    pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
+  }, (error) => on_error(res, error));
 });
 
 router.get('/getIrrigationData', (req, res, next) => {
@@ -78,82 +123,41 @@ router.get('/getIrrigationData', (req, res, next) => {
     const damData = []
 
     try {
-      for (let index = 4; index <= 23; index++) {
-        let storagePercentage = null
-        if(result.pageTables[0].tables[index][10] === '' || result.pageTables[0].tables[index][10] === '_') {
-          storagePercentage = ((result.pageTables[0].tables[index][9]/result.pageTables[0].tables[index][8]) * 100).toFixed(2)
-        } else {
-          storagePercentage = result.pageTables[0].tables[index][10]
+      for (const page of result.pageTables) {
+        for (const dam of page.tables) {
+          // If first column is a number, then it is a dam
+          if (dam[0] != '' && !isNaN(dam[0])) {
+            let storagePercentage = calculate_storage_percentage(dam);
+            damData.push({
+              slNo: clean_text(dam[0]),
+              name: split_ml_en(clean_text(dam[1])),
+              district: split_ml_en(clean_text(dam[2])),
+              maxWaterLevel: clean_text(dam[3]),
+              currentWaterLevel: clean_text(dam[4]),
+              blueAlertLevel: clean_text(dam[5]),
+              orangeAlertLevel: clean_text(dam[6]),
+              redAlertLevel: clean_text(dam[7]),
+              spillAmount: clean_text(dam[11]),
+              remarks: clean_text(dam[12]),
+              percentStorage: storagePercentage
+            })
+          }
         }
-        damData.push({
-          slNo: result.pageTables[0].tables[index][0],
-          name: result.pageTables[0].tables[index][1],
-          district: result.pageTables[0].tables[index][2],
-          currentWaterLevel: result.pageTables[0].tables[index][4],
-          maxWaterLevel: result.pageTables[0].tables[index][3],
-          remarks: result.pageTables[0].tables[index][12],
-          blueAlertLevel: result.pageTables[0].tables[index][5],
-          orangeAlertLevel: result.pageTables[0].tables[index][6],
-          redAlertLevel: result.pageTables[0].tables[index][7],
-          percentStorage: storagePercentage,
-          spillAmount: result.pageTables[0].tables[index][11]
-        })
       }
-  
-      var last_updated = "";
-      const last_updated_string_array = result.pageTables[0].tables[0][0].split("")
-      for (let index = 68; index <= 88; index++) {
-        if(last_updated_string_array[index] !== undefined)
-          last_updated = last_updated + last_updated_string_array[index]
-      }  
 
       res.status(200).json({
         message: damData,
         error: false,
-        last_updated: last_updated
-      });  
+        last_updated: extract_lastupdated(result.pageTables[0].tables)
+      });
     } catch (error) {
-      res.status(200).json({
-        error: true,
-        message: err
-      })  
+      on_error(res, error);
     }
   }
 
-  const error = (err) => {
-    res.status(200).json({
-      error: true,
-      message: err
-    })
-  }
-
-
-  download(process.env.IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION, "irrigation_dam.pdf").then(
-    function(value) {
-      pdf_table_extractor("irrigation_dam.pdf", success, error);
-    },
-    function(error) {
-      console.error(error);
-    }
-  )
+  download(process.env.IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION, "irrigation_dam.pdf").then((value) => {
+    pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
+  }, (error) => on_error(res, error));
 });
-
-  // Function to download file
-  const download = (url, dest) => new Promise((resolve, reject) => {
-    https.get(url, response => {
-        const statusCode = response.statusCode;
-    
-        if (statusCode !== 200) {
-            return reject('Download error!');
-        }
-    
-        const writeStream = fs.createWriteStream(dest);
-        response.pipe(writeStream);
-    
-        writeStream.on('error', () => reject('Error writing to file!'));
-        writeStream.on('finish', () => writeStream.close(resolve));
-    });
-  })
-  .catch(err => console.error(err));
 
 module.exports = router
