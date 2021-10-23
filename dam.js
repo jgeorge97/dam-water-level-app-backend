@@ -62,7 +62,10 @@ function extract_lastupdated(table) {
 // Calculate storage usage if not present
 function calculate_storage_percentage(dam) {
   if (dam[10] === '' || dam[10] === '_') {
-    return ((dam[9] / dam[8]) * 100).toFixed(2);
+    if(dam[8] !== 'N/A' && dam[9] !== '-' && dam[9] !== '_')
+      return ((dam[9] / dam[8]) * 100).toFixed(2);
+    else
+      return null
   }
   return dam[10];
 }
