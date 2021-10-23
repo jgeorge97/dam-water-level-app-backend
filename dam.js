@@ -59,19 +59,9 @@ function extract_lastupdated(table) {
   return '';
 }
 
-// Calculate storage usage if not present
-function calculate_storage_percentage(dam) {
-  if (dam[10] === '' || dam[10] === '_') {
-    if(dam[8] !== 'N/A' && dam[9] !== '-' && dam[9] !== '_')
-      return ((dam[9] / dam[8]) * 100).toFixed(2);
-    else
-      return null
-  }
-  return dam[10];
-}
-
 // Handle errors
 function on_error(res, err) {
+  console.error(err);
   res.status(200).json({
     error: true,
     message: err
@@ -111,6 +101,7 @@ router.get('/getData', (req, res, next) => {
         last_updated: extract_lastupdated(result.pageTables[0].tables)
       });
     } catch (error) {
+      console.error(error);
       on_error(res, error);
     }
   }
@@ -130,7 +121,6 @@ router.get('/getIrrigationData', (req, res, next) => {
         for (const dam of page.tables) {
           // If first column is a number, then it is a dam
           if (dam[0] != '' && !isNaN(dam[0])) {
-            let storagePercentage = calculate_storage_percentage(dam);
             damData.push({
               slNo: clean_text(dam[0]),
               name: split_ml_en(clean_text(dam[1])),
@@ -142,7 +132,7 @@ router.get('/getIrrigationData', (req, res, next) => {
               redAlertLevel: clean_text(dam[7]),
               spillAmount: clean_text(dam[11]),
               remarks: clean_text(dam[12]),
-              percentStorage: storagePercentage
+              percentStorage: dam[10] !== '_' ? clean_text(dam[10]) : null
             })
           }
         }
@@ -154,6 +144,7 @@ router.get('/getIrrigationData', (req, res, next) => {
         last_updated: extract_lastupdated(result.pageTables[0].tables)
       });
     } catch (error) {
+      console.error(error);
       on_error(res, error);
     }
   }
