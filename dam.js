@@ -4,6 +4,7 @@ var pdf_table_extractor = require("pdf-table-extractor");
 const https = require("https");
 const fs = require('fs')
 const cors = require('cors')
+const tabletojson = require('tabletojson').Tabletojson;
 
 // Function to download file
 const download = (url, dest) => new Promise((resolve, reject) => {
@@ -153,5 +154,31 @@ router.get('/getIrrigationData', (req, res, next) => {
     pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
   }, (error) => on_error(res, error));
 });
+
+router.get('/getTNDamData', (req, res, next) => {
+  tabletojson.convertUrl(process.env.TN_DATA_URL)
+  .then((data) => {
+    let damData = []
+    data[0].forEach(dam => {
+      damData.push({
+        name: {
+          en: dam.Reservoirs === 'Periyar**' ? 'Mullaperiyar' : dam.Reservoirs
+        },
+        currentWaterLevel: dam['Current Year Level(Feet)'] + ' ft',
+        maxWaterLevel: dam['Full Depth(Feet)'] + ' ft',
+        priority: dam.Reservoirs === 'Periyar**' ? 1 : 0 //Giving priority to Mullaperiyar
+      })
+    });
+    res.status(200).json({
+      message: damData.sort((a, b) => {
+        return b.priority - a.priority // Sorting based on priority
+      }),
+      error: false,
+    });
+  })
+  .catch((error) => {
+    on_error(res, error);
+  })
+})
 
 module.exports = router
