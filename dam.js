@@ -165,7 +165,7 @@ router.get('/getTNDamData', (req, res, next) => {
           en: dam.Reservoirs === 'Periyar**' ? 'Mullaperiyar' : dam.Reservoirs
         },
         currentWaterLevel: dam['Current Year Level(Feet)'] + ' ft',
-        maxWaterLevel: dam['Full Depth(Feet)'] + ' ft',
+        maxWaterLevel: dam.Reservoirs === 'Periyar**' ? '142 ft' : dam['Full Depth(Feet)'] + ' ft',
         priority: dam.Reservoirs === 'Periyar**' ? 1 : 0 //Giving priority to Mullaperiyar
       })
     });
