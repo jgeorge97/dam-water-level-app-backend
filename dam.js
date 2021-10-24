@@ -5,6 +5,7 @@ const https = require("https");
 const fs = require('fs')
 const cors = require('cors')
 const tabletojson = require('tabletojson').Tabletojson;
+const siteCrawler = require('./crawler');
 
 // Function to download file
 const download = (url, dest) => new Promise((resolve, reject) => {
@@ -107,9 +108,11 @@ router.get('/getData', (req, res, next) => {
     }
   }
 
-  download(process.env.DAM_WATER_LEVEL_FILE_LOCATION, "kseb_dam.pdf").then((value) => {
-    pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
-  }, (error) => on_error(res, error));
+  siteCrawler("KSEB").then(link => {
+    download("https://sdma.kerala.gov.in/wp-content/uploads/2021/10/kseb_site_10pm.pdf", "kseb_dam.pdf").then((value) => {
+      pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
+    }, (error) => on_error(res, error));
+  });
 });
 
 router.get('/getIrrigationData', (req, res, next) => {
@@ -150,9 +153,11 @@ router.get('/getIrrigationData', (req, res, next) => {
     }
   }
 
-  download(process.env.IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION, "irrigation_dam.pdf").then((value) => {
-    pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
-  }, (error) => on_error(res, error));
+  siteCrawler("IRRIGATION").then(link => {
+    download(link, "irrigation_dam.pdf").then((value) => {
+      pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
+    }, (error) => on_error(res, error));
+  });
 });
 
 router.get('/getTNDamData', (req, res, next) => {
