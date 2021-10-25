@@ -160,14 +160,24 @@ router.get('/getTNDamData', (req, res, next) => {
   .then((data) => {
     let damData = []
     data[0].forEach(dam => {
-      damData.push({
+      /* damData.push({
         name: {
           en: dam.Reservoirs === 'Periyar**' ? 'Mullaperiyar' : dam.Reservoirs
         },
         currentWaterLevel: dam['Current Year Level(Feet)'] + ' ft',
         maxWaterLevel: dam.Reservoirs === 'Periyar**' ? '142 ft' : dam['Full Depth(Feet)'] + ' ft',
         priority: dam.Reservoirs === 'Periyar**' ? 1 : 0 //Giving priority to Mullaperiyar
-      })
+      }) */
+      if(dam.Reservoirs === 'Periyar**') { // Showing mullaperiyar dam for now
+        damData.push({
+          name: {
+            en: 'Mullaperiyar'
+          },
+          currentWaterLevel: dam['Current Year Level(Feet)'] + ' ft',
+          maxWaterLevel: '142 ft',
+          priority: 1 //Giving priority to Mullaperiyar
+        })
+      }
     });
     res.status(200).json({
       message: damData.sort((a, b) => {
