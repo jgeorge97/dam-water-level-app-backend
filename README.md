@@ -2,7 +2,7 @@
 
 [Telegram Group](https://t.me/dam_level_app_community)
 
-[Matrix Room](https://app.element.io/#/room/#dam-water-level-app-discussions:matrix.org)
+[Matrix Room](https://matrix.to/#/#dam-water-level-app-discussions:matrix.org)
 
 Backend to fetch water level data of Dams in Kerala & Tamil Nadu from [KSDMA](https://sdma.kerala.gov.in/dam-water-level/) & [AGRISNET](https://www.tnagrisnet.tn.gov.in/).
 
