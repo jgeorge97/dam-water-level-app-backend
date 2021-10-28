@@ -109,7 +109,7 @@ router.get('/getData', (req, res, next) => {
   }
 
   siteCrawler("KSEB").then(link => {
-    download("https://sdma.kerala.gov.in/wp-content/uploads/2021/10/kseb_site_10pm.pdf", "kseb_dam.pdf").then((value) => {
+    download(link, "kseb_dam.pdf").then((value) => {
       pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
     }, (error) => on_error(res, error));
   });
