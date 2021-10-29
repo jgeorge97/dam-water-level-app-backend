@@ -1,25 +1,21 @@
 const express = require('express');
 const router = express.Router();
 var pdf_table_extractor = require("pdf-table-extractor");
-const https = require("https");
-const fs = require('fs')
 const cors = require('cors')
 const tabletojson = require('tabletojson').Tabletojson;
+const wget = require('wget-improved');
 
 // Function to download file
 const download = (url, dest) => new Promise((resolve, reject) => {
-  https.get(url, response => {
-    const statusCode = response.statusCode;
 
-    if (statusCode !== 200) {
-      return reject('Download error!');
-    }
+  let download = wget.download(url, dest)
 
-    const writeStream = fs.createWriteStream(dest);
-    response.pipe(writeStream);
+  download.on('error', function(err) {
+    reject('Error writing to file!')
+  });
 
-    writeStream.on('error', () => reject('Error writing to file!'));
-    writeStream.on('finish', () => writeStream.close(resolve));
+  download.on('end', function(output) {
+    resolve()
   });
 }).catch(err => console.error(err));
 
