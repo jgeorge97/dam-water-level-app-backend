@@ -15,9 +15,13 @@
     "express": "^4.17.1",
     "pdf-table-extractor": "^1.0.3",
     "tabletojson": "^2.0.7",
-    "wget-improved": "^3.2.1"
+    "wget-improved": "^3.2.1",
+    "node-fetch": "2.6.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.13"
+  },
+  "engines": {
+    "node": "14.18.1"
   }
 }

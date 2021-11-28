@@ -1,17 +1,21 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-module.exports = (source) => new Promise((resolve) => {
-    fetch('https://sdma.kerala.gov.in/dam-water-level/').then(response => response.text()).then(body => {
-        const $ = cheerio.load(body);
-        var link = null;
-        $('div.entry-content ol li').each((i, elem) => {
-            var liTitle = $(elem).text();
-            if (liTitle.toLowerCase().includes(source.toLowerCase())) {
-                var anchorTag = $(elem).children();
-                link = `https://sdma.kerala.gov.in${anchorTag.attr('href')}`;
-            }
-        });
-        resolve(link);
-    });
-});
+module.exports = {
+   
+    getPDF: async function(){
+        var link = [];
+        await fetch(process.env.KERALA_DAM_WATER_LEVEL_PDF_URI).then(response => response.text()).then(body => {
+
+            const $ = cheerio.load(body);
+
+            $('div.entry-content ol li').each((i, elem) => {
+                var anchorTag = $(elem).children();        
+                link.push(`${anchorTag.attr('href')}`);
+            });
+
+        });   
+         
+        return link;    
+    }
+}

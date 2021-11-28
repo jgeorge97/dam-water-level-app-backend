@@ -4,6 +4,7 @@ var pdf_table_extractor = require("pdf-table-extractor");
 const cors = require('cors')
 const tabletojson = require('tabletojson').Tabletojson;
 const wget = require('wget-improved');
+var craw = require('./crawler')
 
 // Function to download file
 const download = (url, dest) => new Promise((resolve, reject) => {
@@ -102,10 +103,12 @@ router.get('/getData', (req, res, next) => {
       on_error(res, error);
     }
   }
+  craw.getPDF().then(data => {
+    download(data[0], "kseb_dam.pdf").then((value) => {
+      pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
+    }, (error) => on_error(res, error));
+  })
 
-  download(process.env.DAM_WATER_LEVEL_FILE_LOCATION, "kseb_dam.pdf").then((value) => {
-    pdf_table_extractor("kseb_dam.pdf", success, (error) => on_error(res, error));
-  }, (error) => on_error(res, error));
 });
 
 router.get('/getIrrigationData', (req, res, next) => {
@@ -146,9 +149,12 @@ router.get('/getIrrigationData', (req, res, next) => {
     }
   }
 
-  download(process.env.IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION, "irrigation_dam.pdf").then((value) => {
-    pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
-  }, (error) => on_error(res, error));
+  craw.getPDF().then(data => {
+    download(data[1], "irrigation_dam.pdf").then((value) => {
+      pdf_table_extractor("irrigation_dam.pdf", success, (error) => on_error(res, error));
+    }, (error) => on_error(res, error));
+  })
+
 });
 
 router.get('/getTNDamData', (req, res, next) => {

@@ -11,9 +11,9 @@ Since the data in KSDMA is uploaded as a pdf without a uniform naming convention
 ## Enviroment Variables
 Variable | Description
 ---------|------------
-DAM_WATER_LEVEL_FILE_LOCATION | URL of the KSEB dam data pdf file obtained from KSDMA site (https only)
-IRRIGATION_DAM_WATER_LEVEL_FILE_LOCATION | URL of the irrigation dams data pdf file obtained from KSDMA site (https only)
+KERALA_DAM_WATER_LEVEL_PDF_URI | Webpage where URLs of the KSEB dam data PDFs are hyperlinked. (file obtained from KSDMA site (https only)
 TN_DATA_URL | URL of TN dams data, from AGRISNET
+
 ## API Routes
 Route | Description
 ------|------------
@@ -22,8 +22,9 @@ Route | Description
 /dam/getTNDamData | Returns a JSON containing the status of dams in Tamil Nadu
 
 ## To-do
-- [ ] A HTML crawler to fetch the URL's of the PDF files automatically
+- [x] A HTML crawler to fetch the URL's of the PDF files automatically
 - [x] A efficient way to extract entire date & time from the PDF
 - [ ] Logic to calculate alert level of the dam
 - [ ] Find a better way to get the data preferrably a spreadsheet
 - [ ] Fix Malayalam typo
+- [ ] Reduce processing time.
